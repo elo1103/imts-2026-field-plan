@@ -125,6 +125,9 @@
     .time { flex: 0 0 auto; color: var(--navy); font-size: .72rem; font-weight: 850; }
     .place { color: var(--blue); font-size: .75rem; font-weight: 760; }
     .event p { margin: 5px 0 0; color: var(--muted); font-size: .82rem; }
+    .event.vendor-event { cursor: pointer; transition: transform .12s ease; }
+    .event.vendor-event:active { transform: scale(.987); }
+    .profile-link { display: block; margin-top: 6px; color: var(--blue); font-size: .7rem; font-weight: 850; text-align: right; }
 
     .segmented { display: flex; gap: 5px; overflow-x: auto; margin: 0 0 12px; scrollbar-width: none; }
     .segment { flex: 0 0 auto; min-height: 42px; padding: 8px 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; background: white; font-size: .76rem; font-weight: 800; }
@@ -373,7 +376,10 @@ Follow-up? Why and by when:"></textarea>
         Object.entries(days).forEach(([id, day]) => {
           document.getElementById(id).innerHTML = `<div class="day-head"><p class="kicker" style="color:var(--blue)">${day.date}</p><h2>${day.title}</h2><div class="route">${day.route.map(item => `<span>${item}</span>`).join('')}</div></div><div class="timeline">${day.events.map((event, index) => {
             const key = `${id}-${index}`;
-            return `<div class="stop"><input class="check" type="checkbox" data-task="${key}" aria-label="完成 ${esc(event[1])}" ${progress[key] ? 'checked' : ''}><article class="event ${event[4]} ${progress[key] ? 'done' : ''}"><div class="event-top"><h3>${esc(event[1])}</h3><span class="time">${esc(event[0])}</span></div>${event[2] ? `<div class="place">${esc(event[2])}</div>` : ''}${event[3] ? `<p>${esc(event[3])}</p>` : ''}</article></div>`;
+            const vendor = vendors.find(item => event[1].startsWith(item.name));
+            const eventClasses = `event ${event[4]} ${progress[key] ? 'done' : ''}${vendor ? ' vendor-event' : ''}`;
+            const linkAttributes = vendor ? ` role="link" tabindex="0" data-url="${vendor.url}" aria-label="Open ${esc(vendor.name)} IMTS profile"` : '';
+            return `<div class="stop"><input class="check" type="checkbox" data-task="${key}" aria-label="完成 ${esc(event[1])}" ${progress[key] ? 'checked' : ''}><article class="${eventClasses}"${linkAttributes}><div class="event-top"><h3>${esc(event[1])}</h3><span class="time">${esc(event[0])}</span></div>${event[2] ? `<div class="place">${esc(event[2])}</div>` : ''}${event[3] ? `<p>${esc(event[3])}</p>` : ''}${vendor ? '<span class="profile-link">IMTS ↗</span>' : ''}</article></div>`;
           }).join('')}</div>`;
         });
         document.querySelectorAll('.check').forEach(check => check.addEventListener('change', () => {
@@ -382,6 +388,10 @@ Follow-up? Why and by when:"></textarea>
           write(progressKey, progress);
           updateProgress();
         }));
+        document.querySelectorAll('.vendor-event').forEach(card => {
+          card.addEventListener('click', () => openUrl(card.dataset.url));
+          card.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openUrl(card.dataset.url); } });
+        });
       }
 
       function renderVendors(filter='All') {
