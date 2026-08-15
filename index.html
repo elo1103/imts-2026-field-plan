@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10233f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="IMTS Plan">
+  <title>IMTS 2026 Field Plan</title>
+  <style>
+    :root {
+      --navy: #10233f;
+      --navy-2: #1c3d64;
+      --ink: #172033;
+      --muted: #647084;
+      --line: #dbe2ea;
+      --wash: #f3f6f8;
+      --paper: #fff;
+      --blue: #276aa5;
+      --blue-soft: #eaf3fb;
+      --green: #197052;
+      --green-soft: #e8f5ef;
+      --orange: #a95a08;
+      --orange-soft: #fff3df;
+      --purple: #6840ba;
+      --purple-soft: #f1ebff;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { background: var(--wash); }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--wash);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      line-height: 1.48;
+      overscroll-behavior-y: contain;
+    }
+    button, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .app { width: min(680px, 100%); min-height: 100vh; margin: 0 auto; overflow-x: hidden; background: var(--wash); }
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      padding: calc(12px + var(--safe-top)) 16px 12px;
+      color: white;
+      background: linear-gradient(135deg, var(--navy), var(--navy-2));
+      box-shadow: 0 4px 18px rgba(16, 35, 63, .18);
+    }
+    .header-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
+    .brand { min-width: 0; font-size: 1.25rem; font-weight: 850; letter-spacing: -.025em; }
+    .brand small { display: block; margin-top: 1px; color: #bcd4e9; font-size: .68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .net { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 6px; padding: 6px 9px; border: 1px solid rgba(255,255,255,.2); border-radius: 999px; background: rgba(255,255,255,.1); font-size: .72rem; font-weight: 750; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #66d19e; }
+    .net.offline .dot { background: #ffb55e; }
+    .header-progress { height: 3px; margin-top: 11px; overflow: hidden; border-radius: 99px; background: rgba(255,255,255,.18); }
+    .header-progress > div { width: 0; height: 100%; background: #75c7fa; transition: width .2s ease; }
+
+    main { min-width: 0; padding: 14px 13px calc(92px + var(--safe-bottom)); }
+    .view { display: none; }
+    .view.active { display: block; }
+    .card { margin-bottom: 12px; padding: 17px; border: 1px solid var(--line); border-radius: 16px; background: var(--paper); box-shadow: 0 7px 20px rgba(16,35,63,.055); }
+    .hero-card { color: white; border: 0; background: linear-gradient(145deg, #183a5f, #28648e); }
+    .kicker { margin: 0 0 5px; color: #bcd9ed; font-size: .69rem; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
+    h1, h2, h3 { margin-top: 0; color: var(--navy); line-height: 1.2; letter-spacing: -.02em; }
+    .hero-card h1 { margin-bottom: 9px; overflow-wrap: anywhere; color: white; font-size: 1.58rem; }
+    h2 { margin-bottom: 6px; font-size: 1.28rem; }
+    h3 { margin-bottom: 6px; font-size: 1rem; }
+    p { margin-top: 0; }
+    .subtle { color: var(--muted); font-size: .88rem; }
+
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 15px; }
+    .stat { min-width: 0; padding: 10px 5px; border-radius: 11px; background: rgba(255,255,255,.11); text-align: center; }
+    .stat b { display: block; font-size: 1.15rem; }
+    .stat span { color: #cbe0ef; font-size: .67rem; }
+
+    .quick-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+    .quick {
+      min-width: 0;
+      min-height: 52px;
+      padding: 10px 12px;
+      color: var(--navy);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      font-weight: 780;
+      overflow-wrap: anywhere;
+      text-align: left;
+    }
+    .quick span { display: block; margin-top: 2px; color: var(--muted); font-size: .7rem; font-weight: 650; }
+
+    .day-head { margin-bottom: 12px; padding: 4px 3px; }
+    .day-head p { margin-bottom: 0; color: var(--muted); font-size: .84rem; }
+    .route { display: flex; gap: 5px; overflow-x: auto; margin-top: 10px; padding-bottom: 3px; scrollbar-width: none; }
+    .route::-webkit-scrollbar { display: none; }
+    .route span { flex: 0 0 auto; padding: 6px 9px; border-radius: 999px; color: var(--blue); background: var(--blue-soft); font-size: .7rem; font-weight: 800; }
+
+    .timeline { position: relative; }
+    .timeline::before { content: ""; position: absolute; top: 15px; bottom: 15px; left: 18px; width: 2px; background: #dfe6ed; }
+    .stop { display: grid; grid-template-columns: 38px 1fr; position: relative; margin-bottom: 9px; }
+    .check {
+      appearance: none;
+      z-index: 1;
+      width: 26px;
+      height: 26px;
+      margin: 13px 0 0 6px;
+      border: 2px solid #9fb1c2;
+      border-radius: 50%;
+      background: white;
+    }
+    .check:checked { border-color: var(--green); background: var(--green); }
+    .check:checked::after { content: "✓"; display: grid; place-items: center; color: white; font-size: .9rem; font-weight: 900; }
+    .event { min-height: 62px; padding: 12px 13px; border: 1px solid var(--line); border-radius: 13px; background: white; }
+    .event.talk { border-color: #acd9c6; background: #f5fbf8; }
+    .event.travel { background: #f8fafb; }
+    .event.done { opacity: .52; }
+    .event.done h3 { text-decoration: line-through; }
+    .event-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+    .event h3 { margin-bottom: 3px; }
+    .time { flex: 0 0 auto; color: var(--navy); font-size: .72rem; font-weight: 850; }
+    .place { color: var(--blue); font-size: .75rem; font-weight: 760; }
+    .event p { margin: 5px 0 0; color: var(--muted); font-size: .82rem; }
+
+    .segmented { display: flex; gap: 5px; overflow-x: auto; margin: 0 0 12px; scrollbar-width: none; }
+    .segment { flex: 0 0 auto; min-height: 42px; padding: 8px 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; background: white; font-size: .76rem; font-weight: 800; }
+    .segment.active { color: white; border-color: var(--navy); background: var(--navy); }
+    .vendor { position: relative; padding-right: 44px; transition: transform .12s ease; }
+    .vendor:active { transform: scale(.987); }
+    .vendor::after { content: "↗"; position: absolute; top: 17px; right: 17px; color: var(--blue); font-size: 1.05rem; font-weight: 900; }
+    .vendor-row { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
+    .vendor-name { color: var(--navy); font-weight: 850; }
+    .tag { padding: 3px 7px; border-radius: 999px; font-size: .62rem; font-weight: 900; }
+    .tag.a { color: #135bc2; background: #e9f2ff; }
+    .tag.b { color: var(--orange); background: var(--orange-soft); }
+    .tag.anchor { color: var(--purple); background: var(--purple-soft); }
+    .vendor-booth { color: var(--blue); font-size: .78rem; font-weight: 800; }
+    .vendor-question { margin: 8px 0 0; color: var(--muted); font-size: .8rem; }
+
+    details { margin-bottom: 9px; border: 1px solid var(--line); border-radius: 13px; background: white; }
+    summary { min-height: 50px; padding: 13px; color: var(--navy); font-weight: 830; list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+"; float: right; color: var(--blue); }
+    details[open] summary::after { content: "–"; }
+    details p { padding: 0 13px 13px; margin: 0; color: #364257; font-size: .86rem; }
+
+    textarea { width: 100%; min-height: 260px; padding: 14px; resize: vertical; color: var(--ink); border: 1px solid var(--line); border-radius: 13px; background: white; font-size: 16px; line-height: 1.5; }
+    textarea:focus { border-color: var(--blue); outline: 3px solid rgba(39,106,165,.13); }
+    .note-actions { display: flex; gap: 8px; margin-top: 9px; }
+    .btn { min-height: 46px; padding: 9px 13px; color: var(--navy); border: 1px solid var(--line); border-radius: 11px; background: white; font-weight: 790; }
+    .btn.primary { color: white; border-color: var(--navy); background: var(--navy); }
+    .saved { align-self: center; color: var(--green); font-size: .74rem; font-weight: 750; }
+
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      z-index: 40;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      width: min(680px, 100%);
+      padding: 7px 7px calc(7px + var(--safe-bottom));
+      border-top: 1px solid var(--line);
+      background: rgba(255,255,255,.96);
+      backdrop-filter: blur(16px);
+      transform: translateX(-50%);
+    }
+    .nav-btn { min-width: 0; min-height: 49px; overflow: hidden; padding: 5px 2px; color: var(--muted); border: 0; border-radius: 10px; background: transparent; font-size: .67rem; font-weight: 750; white-space: nowrap; }
+    .nav-btn b { display: block; margin-bottom: 2px; font-size: 1.05rem; line-height: 1; }
+    .nav-btn.active { color: var(--blue); background: var(--blue-soft); }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(78px + var(--safe-bottom));
+      z-index: 70;
+      width: calc(min(680px, 100%) - 26px);
+      padding: 13px 15px;
+      color: white;
+      border-radius: 13px;
+      background: var(--navy);
+      box-shadow: 0 12px 30px rgba(0,0,0,.24);
+      opacity: 0;
+      transform: translate(-50%, 12px);
+      pointer-events: none;
+      transition: .18s ease;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .toast b { display: block; }
+    .toast span { color: #cfdfed; font-size: .78rem; }
+
+    .privacy { padding: 12px; border-left: 4px solid var(--green); border-radius: 10px; background: var(--green-soft); color: #275a49; font-size: .8rem; }
+    .install { padding: 13px; border-radius: 12px; background: var(--blue-soft); font-size: .84rem; }
+    .install b { color: var(--navy); }
+    .reset { color: #8b2c2c; }
+
+    @media (min-width: 681px) {
+      body { padding-block: 20px; }
+      .app { overflow: hidden; border-radius: 24px; box-shadow: 0 20px 55px rgba(16,35,63,.15); }
+      .app-header { top: 20px; border-radius: 24px 24px 0 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="header-row">
+        <div class="brand">IMTS 2026<small>Field plan · Sep 16–18</small></div>
+        <div class="net" id="netState"><span class="dot"></span><span id="netText">Online</span></div>
+      </div>
+      <div class="header-progress" aria-label="行程完成度"><div id="progressBar"></div></div>
+    </header>
+
+    <main>
+      <section class="view active" id="home">
+        <div class="card hero-card">
+          <p class="kicker">Chicago · Central Time</p>
+          <h1>三天，只收集會改變判斷的證據。</h1>
+          <p style="margin-bottom:0;color:#d5e5f1;font-size:.88rem">Buyer reality → Physical AI → Software adoption → Focused follow-up</p>
+          <div class="stats"><div class="stat"><b>13</b><span>Companies</span></div><div class="stat"><b>3</b><span>Sessions</span></div><div class="stat"><b id="progressText">0%</b><span>Complete</span></div></div>
+        </div>
+
+        <div class="card">
+          <h2>快速開啟</h2>
+          <div class="quick-grid">
+            <button class="quick" data-go="day1">9/16 Wednesday<span>West → North</span></button>
+            <button class="quick" data-go="day2">9/17 Thursday<span>East → West → East</span></button>
+            <button class="quick" data-go="day3">9/18 Friday<span>South → Return visits</span></button>
+            <button class="quick" data-go="questions">現場問題<span>Vendor + buyer prompts</span></button>
+            <button class="quick" data-go="notes">快速筆記<span>Auto-saved on this phone</span></button>
+            <button class="quick" data-go="booths">Booth directory<span>Official IMTS links</span></button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>場館時間</h2>
+          <p class="subtle"><b>East／West</b> 9:00 AM–5:00 PM<br><b>North／South</b> 10:00 AM–6:00 PM<br>跨 building 預留 15–20 分鐘。</p>
+          <div class="install"><b>加入 iPhone 主畫面：</b>在 Safari 點分享圖示，再選「加入主畫面」。之後會像 App 一樣直接開啟。</div>
+        </div>
+
+        <div class="card">
+          <div class="privacy"><b>Public-safe field edition</b><br>本頁只有公開展會資訊、一般訪談問題與本機筆記；不含雇主、法律或內部商業資料。</div>
+          <button class="btn reset" id="resetAll" type="button" style="width:100%;margin-top:12px">清除所有勾選與本機筆記</button>
+        </div>
+      </section>
+
+      <section class="view" id="day1"></section>
+      <section class="view" id="day2"></section>
+      <section class="view" id="day3"></section>
+
+      <section class="view" id="booths">
+        <div class="day-head"><h2>Booth directory</h2><p>點卡片會在新分頁開啟官方 IMTS profile。</p></div>
+        <div class="segmented" id="boothFilters"></div>
+        <div id="vendorList"></div>
+      </section>
+
+      <section class="view" id="questions">
+        <div class="day-head"><h2>現場問題</h2><p>每家公司只負責回答一個不同問題。</p></div>
+        <div id="questionList"></div>
+        <div class="card">
+          <h2>Buyer-side reality check</h2>
+          <p class="subtle">Have you had a technology deployment that worked mostly as promised? What made that one succeed?</p>
+          <p class="subtle">After purchase, what work was still left for your team, the vendor, or an integrator?</p>
+          <p class="subtle" style="margin-bottom:0">What result made—or would make—you call the deployment successful?</p>
+        </div>
+      </section>
+
+      <section class="view" id="notes">
+        <div class="day-head"><h2>快速筆記</h2><p>內容只儲存在這支手機的瀏覽器，不會上傳。</p></div>
+        <div class="card">
+          <textarea id="fieldNotes" aria-label="IMTS field notes" placeholder="Person / role / company:
+Buyer, vendor, integrator, or partner:
+Current workflow / deployment:
+What was tried:
+Who owned work from purchase to outcome:
+Outcome / counterexample:
+What changed my mind:
+Follow-up? Why and by when:"></textarea>
+          <div class="note-actions"><button class="btn primary" id="copyNotes" type="button">複製筆記</button><span class="saved" id="saveState">Auto-saved</span></div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="主要導覽">
+      <button class="nav-btn active" data-view="home"><b>⌂</b>首頁</button>
+      <button class="nav-btn" data-view="day1"><b>16</b>週三</button>
+      <button class="nav-btn" data-view="day2"><b>17</b>週四</button>
+      <button class="nav-btn" data-view="day3"><b>18</b>週五</button>
+      <button class="nav-btn" data-view="booths"><b>⌖</b>Booths</button>
+    </nav>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"><b id="toastTitle">No internet connection</b><span id="toastText">行程與筆記仍可離線使用。</span></div>
+  <noscript>此現場版需要瀏覽器啟用 JavaScript 才能顯示行程與保存勾選。</noscript>
+
+  <script>
+    (() => {
+      const vendors = [
+        {name:'Creative Automation', day:'9/16', building:'North', booth:'236006', tier:'A', url:'https://directory.imts.com/8_0/exhibitor/00003856/Creative-Automation-Inc', question:'From the first site visit to stable production, where is the engineering effort actually concentrated?'},
+        {name:'Formic', day:'9/16', building:'North', booth:'236329', tier:'A', url:'https://directory.imts.com/8_0/exhibitor/00091015/Formic-Technologies', question:'What does Formic own after deployment, and what must the customer still own for the cell to perform?'},
+        {name:'Standard Bots', day:'9/16', building:'North', booth:'236540 / 236994', tier:'A', url:'https://directory.imts.com/8_0/exhibitor/00091056/Standard-Bots', question:'What work does learning by demonstration remove, and what remains around fixturing, safety, recovery, and integration?'},
+        {name:'Universal Robots', day:'9/16', building:'North', booth:'236744', tier:'B', url:'https://directory.imts.com/8_0/exhibitor/00072874/Universal-Robots', question:'How is responsibility divided among UR, the integrator, and a first-time customer’s internal team?'},
+        {name:'Vention', day:'9/16', building:'North', booth:'236860', tier:'B', url:'https://directory.imts.com/8_0/exhibitor/00080239/Vention', question:'What can a customer now do in software, and where are controls, commissioning, or application engineering still necessary?'},
+        {name:'ProShop ERP', day:'9/17', building:'East', booth:'133027', tier:'A', url:'https://directory.imts.com/8_0/exhibitor/00075368/ProShop-ERP', question:'From signing to becoming the system people trust, where is the hardest implementation and behavior-change work?'},
+        {name:'MachineMetrics', day:'9/17', building:'East', booth:'133100', tier:'A', url:'https://directory.imts.com/8_0/exhibitor/00066152/MachineMetrics/', question:'What must be in place before raw machine data changes a daily decision, and who maintains the ERP context?'},
+        {name:'Paperless Parts', day:'9/17', building:'East', booth:'133267', tier:'B', url:'https://directory.imts.com/8_0/exhibitor/00083908/Paperless-Parts', question:'Before the first quote a shop trusts, what process knowledge and data must the customer provide and validate?'},
+        {name:'Autodesk', day:'9/17', building:'East', booth:'133310', tier:'B', url:'https://directory.imts.com/8_0/exhibitor/00005408/Autodesk-Inc', question:'Where do customers still need application help between design intent, CAM, and production adoption?'},
+        {name:'Datanomix', day:'9/17', building:'East', booth:'135521', tier:'A', url:'https://directory.imts.com/8_0/exhibitor/00085856/Datanomix', question:'What does the coaching team do that software alone cannot, and what must the customer keep doing?'},
+        {name:'Fulcrum', day:'9/17', building:'East', booth:'135816', tier:'B', url:'https://directory.imts.com/8_0/exhibitor/00086814/Fulcrum', question:'When scheduling and shop-floor reality diverge, how is the exception surfaced and who resolves it?'},
+        {name:'Toolpath', day:'9/18', building:'South', booth:'338248', tier:'A', url:'https://directory.imts.com/8_0/exhibitor/1001827/Toolpath', question:'From onboarding to the first estimate or toolpath the shop trusts, what is usually missing when a shop does not continue?'},
+        {name:'Siemens Automation', day:'9/18', building:'South', booth:'338262', tier:'B', url:'https://directory.imts.com/8_0/exhibitor/00000295/SIEMENS', question:'Where does the handoff from virtual commissioning to reliable shop-floor use still require application engineering or partners?'},
+        {name:"Machinists' Hub", day:'9/16–17', building:'West', booth:'432638', tier:'Anchor', url:'https://directory.imts.com/8_0/exhibitor/1003995/IMTS-Machinist-Hub-Brought-to-you-by-Practical-Machinist', question:'What technology worked mostly as promised, and what made that deployment succeed?'}
+      ];
+
+      const days = {
+        day1: {date:'Wednesday · September 16', title:'Buyer reality → Physical AI', route:['West #432638','North #236702','2367xx–2369xx','2365xx–2360xx'], events:[
+          ['9:00–10:35',"Machinists' Hub：buyer 開場",'West #432638','找一位 shop owner／operator，問目前最不值得自動化的 process。',''],
+          ['11:00–12:00','Automation in the Real World','West #432638','When It Actually Makes Sense；記錄成功條件與反例。','talk'],
+          ['12:00–12:25','講者／觀眾對談','West #432638','What made one project actually work—or clearly not worth doing?',''],
+          ['12:25–12:55','午餐＋West → North','前往 #236702','','travel'],
+          ['1:00–1:30','The Next Leap: Physical AI','North #236702','聽完後問：哪個 claim 最可信、哪個仍像 demo？','talk'],
+          ['1:50–2:20','Universal Robots','North #236744','找 applications／partner 人員；釐清責任分工。',''],
+          ['2:25–2:55','Vention','North #236860','Software-defined automation 與 commissioning 邊界。',''],
+          ['3:00–3:30','Standard Bots · 主訪','North #236994','親手測試；追問 variation、recovery、fixturing 與 safety。',''],
+          ['3:35–4:00','Standard Bots · 條件式停留','North #236540','只有不同 application／指定人員才停。',''],
+          ['4:05–4:35','Formic','North #236329','Outcome ownership 與客戶殘留責任。',''],
+          ['4:40–5:15','Creative Automation','North #236006','從 discovery 到 commissioning／ramp-up。',''],
+          ['5:15–6:00','Buyer 對話＋收尾','North','寫下可信訊號、hype 訊號、反例與回訪人選。','']
+        ]},
+        day2: {date:'Thursday · September 17', title:'Software → Buyer truth → Software', route:['East 1330xx','West #432638','East 1332xx–1358xx'], events:[
+          ['9:00–9:30','ProShop ERP','East #133027','Implementation、tribal knowledge 與 workflow adoption。',''],
+          ['9:35–10:10','MachineMetrics','East #133100','Data-to-action、ERP context 與 internal owner。',''],
+          ['10:10–10:35','Software buyer 對話','East 133xxx','問購買後還留下哪些工作。',''],
+          ['10:35–10:55','East → West','前往 #432638','','travel'],
+          ['11:00–12:00','AI in Machine Shops','West #432638','Is It Here or Is It a Buzzword?','talk'],
+          ['12:00–12:30','兩位 shop-side 觀眾','West #432638','核對一個有效 use case 與一個不值得的情境。',''],
+          ['12:30–1:00','午餐＋West → East','','','travel'],
+          ['1:00–1:30','Paperless Parts','East #133267','Trusted quote、data readiness 與 human validation。',''],
+          ['1:35–2:05','Autodesk','East #133310','只找 manufacturing expert／product／partner 人員。',''],
+          ['2:05–2:25','休息＋比較','East','比較 ProShop 與 Paperless Parts。','travel'],
+          ['2:30–3:05','Datanomix','East #135521','Coaching、ERP integration 與 measurable adoption。',''],
+          ['3:10–3:45','Fulcrum','East #135816','Scheduling truth 與 exception ownership。',''],
+          ['3:45–5:00','使用者核對＋收尾','East','取得 follow-up permission，完成比較筆記。','']
+        ]},
+        day3: {date:'Friday · September 18', title:'South pair → Focused return visits', route:['East quick return','Toolpath #338248','Siemens #338262','Return visits'], events:[
+          ['9:00–9:40','East 指定人回訪','East','沒有明確對象就整理，不新增公司。',''],
+          ['9:40–10:00','East → South','前往 3382xx','','travel'],
+          ['10:00–10:40','Toolpath','South #338248','Onboarding 到 trusted estimate／toolpath。',''],
+          ['10:45–11:20','Siemens Automation','South #338262','Digital twin、applications 與 partner handoff。',''],
+          ['11:20–12:25','使用者核對＋預約保留','South 3382xx','核對 claim，必要時回 booth 追問矛盾點。',''],
+          ['12:25–1:00','午餐＋下午主線裁決','South','Buyer、technology、follow-up 三者只選一個主線。','travel'],
+          ['1:00–2:30','排名最高的兩人回訪','','每人都要有值得第二次談的明確理由。',''],
+          ['2:30–3:30','補 buyer-side 反例',"Machinists' Hub／demo 出口",'問成功部署與購買後剩餘工作。',''],
+          ['3:30–4:30','補一個缺少的視角','','只補證據缺口，不擴張名單。',''],
+          ['4:30–5:50','Follow-up＋三日總結','','最多三位；寫日期、理由與下一步。','']
+        ]}
+      };
+
+      const progressKey = 'imts-2026-iphone-progress-v1';
+      const noteKey = 'imts-2026-iphone-notes-v1';
+      let progress = read(progressKey, {});
+      let toastTimer;
+
+      function read(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch (_) { return fallback; } }
+      function write(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {} }
+      function esc(value) { return String(value).replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char])); }
+
+      function renderDays() {
+        Object.entries(days).forEach(([id, day]) => {
+          document.getElementById(id).innerHTML = `<div class="day-head"><p class="kicker" style="color:var(--blue)">${day.date}</p><h2>${day.title}</h2><div class="route">${day.route.map(item => `<span>${item}</span>`).join('')}</div></div><div class="timeline">${day.events.map((event, index) => {
+            const key = `${id}-${index}`;
+            return `<div class="stop"><input class="check" type="checkbox" data-task="${key}" aria-label="完成 ${esc(event[1])}" ${progress[key] ? 'checked' : ''}><article class="event ${event[4]} ${progress[key] ? 'done' : ''}"><div class="event-top"><h3>${esc(event[1])}</h3><span class="time">${esc(event[0])}</span></div>${event[2] ? `<div class="place">${esc(event[2])}</div>` : ''}${event[3] ? `<p>${esc(event[3])}</p>` : ''}</article></div>`;
+          }).join('')}</div>`;
+        });
+        document.querySelectorAll('.check').forEach(check => check.addEventListener('change', () => {
+          progress[check.dataset.task] = check.checked;
+          check.nextElementSibling.classList.toggle('done', check.checked);
+          write(progressKey, progress);
+          updateProgress();
+        }));
+      }
+
+      function renderVendors(filter='All') {
+        const list = filter === 'All' ? vendors : vendors.filter(v => v.building === filter || v.tier === filter);
+        document.getElementById('vendorList').innerHTML = list.map(v => `<article class="card vendor" role="link" tabindex="0" data-url="${v.url}" aria-label="Open ${esc(v.name)} IMTS profile"><div class="vendor-row"><span class="vendor-name">${esc(v.name)}</span><span class="tag ${v.tier.toLowerCase()}">${v.tier}</span></div><div class="vendor-booth">${v.building} · #${esc(v.booth)} · ${v.day}</div><p class="vendor-question">${esc(v.question)}</p></article>`).join('');
+        document.querySelectorAll('.vendor').forEach(card => {
+          card.addEventListener('click', () => openUrl(card.dataset.url));
+          card.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openUrl(card.dataset.url); } });
+        });
+      }
+
+      function renderFilters() {
+        const filters = ['All','North','East','South','West','A','B'];
+        document.getElementById('boothFilters').innerHTML = filters.map((filter, index) => `<button class="segment ${index === 0 ? 'active' : ''}" data-filter="${filter}">${filter}</button>`).join('');
+        document.querySelectorAll('.segment').forEach(button => button.addEventListener('click', () => {
+          document.querySelectorAll('.segment').forEach(item => item.classList.toggle('active', item === button));
+          renderVendors(button.dataset.filter);
+        }));
+      }
+
+      function renderQuestions() {
+        document.getElementById('questionList').innerHTML = vendors.filter(v => v.tier !== 'Anchor').map(v => `<details><summary>${esc(v.name)}</summary><p>${esc(v.question)}</p></details>`).join('');
+      }
+
+      function showView(id) {
+        document.querySelectorAll('.view').forEach(view => view.classList.toggle('active', view.id === id));
+        document.querySelectorAll('.nav-btn').forEach(button => button.classList.toggle('active', button.dataset.view === id));
+        window.scrollTo({top:0, behavior:'smooth'});
+      }
+
+      function showToast(title, text) {
+        clearTimeout(toastTimer);
+        document.getElementById('toastTitle').textContent = title;
+        document.getElementById('toastText').textContent = text;
+        document.getElementById('toast').classList.add('show');
+        toastTimer = setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
+      }
+
+      function openUrl(url) {
+        if (!navigator.onLine) { showToast('No internet connection', '行程與筆記仍可離線使用；連線後再開啟 IMTS profile。'); return; }
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
+
+      function updateNetwork() {
+        const online = navigator.onLine;
+        document.getElementById('netState').classList.toggle('offline', !online);
+        document.getElementById('netText').textContent = online ? 'Online' : 'Offline';
+      }
+
+      function updateProgress() {
+        const total = Object.values(days).reduce((sum, day) => sum + day.events.length, 0);
+        const complete = Object.entries(progress).filter(([key, value]) => value && /^day[123]-/.test(key)).length;
+        const percent = Math.round(complete / total * 100);
+        document.getElementById('progressText').textContent = `${percent}%`;
+        document.getElementById('progressBar').style.width = `${percent}%`;
+      }
+
+      renderDays();
+      renderFilters();
+      renderVendors();
+      renderQuestions();
+      updateNetwork();
+      updateProgress();
+
+      document.querySelectorAll('.nav-btn').forEach(button => button.addEventListener('click', () => showView(button.dataset.view)));
+      document.querySelectorAll('[data-go]').forEach(button => button.addEventListener('click', () => showView(button.dataset.go)));
+      window.addEventListener('online', () => { updateNetwork(); showToast('Back online', 'IMTS profile links are available again.'); });
+      window.addEventListener('offline', () => { updateNetwork(); showToast('No internet connection', '行程與筆記仍可離線使用。'); });
+
+      const notes = document.getElementById('fieldNotes');
+      try { notes.value = localStorage.getItem(noteKey) || ''; } catch (_) {}
+      notes.addEventListener('input', () => {
+        try { localStorage.setItem(noteKey, notes.value); } catch (_) {}
+        document.getElementById('saveState').textContent = 'Saved';
+      });
+      document.getElementById('copyNotes').addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(notes.value); showToast('Notes copied', '已複製到剪貼簿。'); }
+        catch (_) { showToast('Copy unavailable', '請長按文字後手動複製。'); }
+      });
+      document.getElementById('resetAll').addEventListener('click', () => {
+        if (!confirm('清除這支裝置上的所有行程勾選與筆記？')) return;
+        progress = {};
+        write(progressKey, progress);
+        try { localStorage.removeItem(noteKey); } catch (_) {}
+        notes.value = '';
+        renderDays();
+        updateProgress();
+        showToast('Local data cleared', '行程勾選與筆記已清除。');
+      });
+
+      const today = new Date();
+      const dateKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+      const autoView = {'2026-09-16':'day1','2026-09-17':'day2','2026-09-18':'day3'}[dateKey];
+      if (autoView) showView(autoView);
+    })();
+  </script>
+</body>
+</html>
